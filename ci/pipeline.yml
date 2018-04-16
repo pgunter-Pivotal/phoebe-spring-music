@@ -1,0 +1,30 @@
+---
+jobs:
+  - name: deploy-app
+    plan:
+    - get: git-repo
+      trigger: true
+    - task: build-artifact
+      file: git-repo/ci/tasks/build.yml
+    - put: deploy-app
+      params:
+        manifest: git-repo/manifest.yml
+        path: build-output/spring-music.jar
+
+resources:
+- name: git-repo
+  type: git
+  source:
+    uri: {{GIT_REPO}}
+    branch: {{GIT_BRANCH}}
+    private_key: {{GIT_PRIVATE_KEY}}
+
+- name: deploy-app
+  type: cf
+  source:
+    api: {{CF_API}}
+    username: {{CF_USER}}
+    password: {{CF_PASS}}
+    organization: {{CF_ORG}}
+    space: {{CF_SPACE}}
+    skip_cert_check: true
